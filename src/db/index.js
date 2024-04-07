@@ -1,6 +1,8 @@
+//DB IS IN ANOTHER CONTINENT 😁
 import mongoose from "mongoose";
 import { DB_NAME } from "../constants.js";
 
+//CONNECTING DATABASE
 const connectDB = async () => {
   try {
     const connectionInstance = await mongoose.connect(

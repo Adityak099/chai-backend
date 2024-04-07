@@ -9,7 +9,7 @@ app.use(
     origin: process.env.CORS_ORIGIN,
     credentials: true,
   })
-);
+); 
 
 app.use(
   express.json({
