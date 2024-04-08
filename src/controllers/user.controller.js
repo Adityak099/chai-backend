@@ -131,7 +131,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   //below code check the password is correct or not.
   const ispasswordValid = await user.isPasswordCorrect(password);
-  
+
   if (!ispasswordValid) {
     throw new ApiError(401, "Invalid User Credentials");
   }
@@ -153,7 +153,7 @@ const loginUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", options)
+    .cookie("refreshToken", refreshToken, options)
     .json(
       new ApiResponse(
         200,
@@ -170,7 +170,7 @@ const loginUser = asyncHandler(async (req, res) => {
 //code for logout user----
 
 const logoutUser = asyncHandler(async (req, res) => {
-  User.findByIdAndUpdate(
+  await User.findByIdAndUpdate(
     req.user._id,
     {
       $set: {
@@ -187,6 +187,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     secure: true,
   };
 
+  //below code clear the cookies from the browser.
   return res
     .status(200)
     .clearCookie("accessToken", options)
@@ -194,4 +195,5 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User Logged Out Successfully"));
 });
 
+//exporting the functions to be used in other files-----
 export { registerUser, loginUser, logoutUser };
