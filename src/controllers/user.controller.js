@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-// import { ApiResponse } from "../utils/ApiResponse.js";
+
 // import bcrypt from "bcryptjs";
 
 const generateAccessAndRefereshTokens = async (userId) => {
@@ -24,8 +24,6 @@ const generateAccessAndRefereshTokens = async (userId) => {
   }
 };
 
-
-
 //code for registring user----
 const registerUser = asyncHandler(async (req, res) => {
   // get user details from frontend
@@ -43,7 +41,9 @@ const registerUser = asyncHandler(async (req, res) => {
     console.log("email: ", email);
 
     if (!(fullName || email || username || password)) {
-      return res.status(400).json(new ApiError(400, "Full Name is required"));
+      return res
+        .status(400)
+        .json(new ApiError(400, "All fields are  required"));
     }
 
     const existedUser = await User.findOne({
@@ -55,20 +55,22 @@ const registerUser = asyncHandler(async (req, res) => {
     }
     //consol.log(req.files)
     const avatarLocalPAth = req.files?.avatar[0]?.path;
+    // console.log("avatarLocalPAth: ", avatarLocalPAth);
     const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
-    // let coverImageLocalPath;
-    if (!avatarLocalPAth) {
+    // let coverImageLocalPath;``
+    if (!avatarLocalPath) {
       throw new ApiError(400, "Avatar file is required");
     }
 
-    const avatar = await uploadOnCloudinary(avatarLocalPAth);
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    // console.log("avatar: ", avatar);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
     if (!avatar) {
-      throw new ApiError(409, "User with email or username already existyyyy");
+      throw new ApiError(409, "Avatar file is required");
     }
-    
+
     const user = await User.create({
       fullName,
       avatar: avatar.url,
@@ -79,8 +81,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     const createdUser = await User.findById(user._id).select(
-      "-password -refreshToken"//minus sign is used to remove the password and refreshToken from the response body.["-password"]);
-
+      "-password -refreshToken" //minus sign is used to remove the password and refreshToken from the response body.["-password"]);
     );
 
     if (!createdUser) {
@@ -100,7 +101,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 //code for login user----
 const loginUser = asyncHandler(async (req, res) => {
-  //req body -. date
+  //req body -> date
   //username or email
   //find the user
   //password check kro
@@ -109,10 +110,17 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const { email, username, password } = req.body;
 
+  //below code check the username or email is empty or not.
   if (!username || !email) {
     throw new ApiError(400, "Username or password is required");
   }
 
+  // Here is an alternative of above code based on logic discussed in video:
+  /*if (!username && !email) {
+    throw new ApiError(400, "username or email is required");
+  }*/
+
+  //below code find the user on the basis of username or email.
   const user = await User.findOne({
     $or: [{ username }, { email }],
   });
@@ -121,12 +129,14 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User does not exist");
   }
 
-  const ispasswordValid = await user.isPasswordCorrest(password);
-
+  //below code check the password is correct or not.
+  const ispasswordValid = await user.isPasswordCorrect(password);
+  
   if (!ispasswordValid) {
     throw new ApiError(401, "Invalid User Credentials");
   }
 
+  //generate access and refresh tokens
   const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
     user._id
   );
@@ -157,7 +167,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-//logout code begins here-----
+//code for logout user----
 
 const logoutUser = asyncHandler(async (req, res) => {
   User.findByIdAndUpdate(
