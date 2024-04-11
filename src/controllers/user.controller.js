@@ -232,7 +232,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 //code for forgot password----
-const chnageCurrentPassword = asyncHandler(async (req, res) => {
+const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
   const user = await User.findById(req.user?._id);
@@ -475,7 +475,7 @@ export {
   refreshAccessToken,
   getCurrentUser,
   updateAccountDetails,
-  chnageCurrentPassword,
+  changeCurrentPassword,
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
