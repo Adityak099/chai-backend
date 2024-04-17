@@ -27,6 +27,16 @@ const generateAccessAndRefereshTokens = async (userId) => {
 
 //code for registring user----
 const registerUser = asyncHandler(async (req, res) => {
+  //get user details from frontend
+  //validation - not empty
+  //check if user already exists: email, username
+  //check for images , check for avatar
+  //upload them to cloudinary , avatar, coverImage
+  //create user object - create entry in db
+  //remove password and refresh token from response
+  //check for user creation 
+  //return res
+  
   try {
     const { fullName, email, username, password } = req.body;
     if (
@@ -36,7 +46,6 @@ const registerUser = asyncHandler(async (req, res) => {
     ) {
       throw new ApiError(400, "All fields are required");
     }
-
     const existedUser = await User.findOne({
       $or: [{ username }, { email }],
     });
